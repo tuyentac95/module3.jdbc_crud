@@ -56,6 +56,9 @@ public class UserServlet extends HttpServlet {
                 case "delete":
                     deleteUser(request,response);
                     break;
+                case "select":
+                    selectUsers(request,response);
+                    break;
                 default:
                     listUser(request,response);
                     break;
@@ -65,6 +68,18 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    private void selectUsers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String country = request.getParameter("country");
+        List<User> listUser = userDao.selectByCountry(country);
+
+        String message = "List Users of " + country;
+        request.setAttribute("listUser",listUser);
+        request.setAttribute("message",message);
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/user/select.jsp");
+        dispatcher.forward(request,response);
+    }
+
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/user/create.jsp");
         dispatcher.forward(request,response);
@@ -72,7 +87,7 @@ public class UserServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        User existingUser = userDao.selectUser(id);
+        User existingUser = userDao.getUserById(id);
         request.setAttribute("user",existingUser);
         RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/user/edit.jsp");
         dispatcher.forward(request,response);
@@ -112,7 +127,7 @@ public class UserServlet extends HttpServlet {
         String email = request.getParameter("email");
         String country = request.getParameter("country");
         User newUser = new User(name, email, country);
-        userDao.insertUser(newUser);
+        userDao.insertUserStore(newUser);
         RequestDispatcher dispatcher = request.getRequestDispatcher("WEB-INF/user/create.jsp");
         dispatcher.forward(request,response);
     }
